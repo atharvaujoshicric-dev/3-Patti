@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Teen Patti Royal — Multiplayer 3 Patti</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #070b14;
+      --felt-center: #0f5c3a;
+      --felt-edge: #062b1b;
+      --gold: #f5c542;
+      --gold-dark: #b8860b;
+      --card-bg: #ffffff;
+      --red-suit: #dc2626;
+      --black-suit: #111827;
+      --glass: rgba(15, 23, 42, 0.78);
+      --glass-border: rgba(255, 255, 255, 0.14);
+      --success: #10b981;
+      --danger: #ef4444;
+      --info: #3b82f6;
+      --card-w: clamp(44px, 7.5vw, 72px);
+      --card-h: calc(var(--card-w) * 1.42);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: radial-gradient(circle at center, #111827 0%, var(--bg-dark) 100%);
+      color: #f8fafc;
+      min-height: 100dvh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---------- HEADER / TOP BAR ---------- */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: rgba(7, 11, 20, 0.9);
+      border-bottom: 1px solid var(--glass-border);
+      z-index: 30;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Cinzel', serif;
+      font-weight: 800;
+      font-size: clamp(1rem, 2.5vw, 1.35rem);
+      color: var(--gold);
+      letter-spacing: 0.5px;
+    }
+
+    .room-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--glass-border);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .room-pill code {
+      color: var(--gold);
+      font-size: 0.92rem;
+      letter-spacing: 1px;
+    }
+
+    .btn-icon {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid var(--glass-border);
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 600;
+      transition: 0.15s;
+    }
+    .btn-icon:hover { background: rgba(255,255,255,0.2); }
+
+    /* ---------- LOBBY OVERLAY ---------- */
+    #lobbyScreen {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .lobby-card {
+      width: 100%;
+      max-width: 480px;
+      background: var(--glass);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: clamp(20px, 4vw, 32px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
+    }
+
+    .lobby-title {
+      font-family: 'Cinzel', serif;
+      text-align: center;
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+
+    .lobby-sub {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(15, 23, 42, 0.9);
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .input-field:focus { border-color: var(--gold); }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: transform 0.12s, filter 0.15s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #fde047 0%, #eab308 50%, #ca8a04 100%);
+      color: #0f172a;
+      box-shadow: 0 4px 15px rgba(234, 179, 8, 0.35);
+    }
+
+    .btn-emerald {
+      background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+      color: #fff;
+    }
+
+    .btn-outline {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.18);
+      color: #f8fafc;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      color: #64748b;
+      font-size: 0.75rem;
+      margin: 16px 0;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .divider span { padding: 0 10px; }
+
+    .sb-toggle {
+      font-size: 0.78rem;
+      color: var(--gold);
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+      margin-bottom: 10px;
+      display: inline-block;
+    }
+
+    /* ---------- GAME ARENA ---------- */
+    #gameScreen {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 8px;
+      max-width: 1360px;
+      width: 100%;
+      margin: 0 auto;
+      gap: 8px;
+    }
+
+    /* Adaptive Table Container for Mobile, Fold, Tablet & Desktop */
+    .table-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      min-height: 410px;
+      padding: 8px;
+    }
+
+    .poker-table {
+      position: relative;
+      width: 100%;
+      max-width: 960px;
+      height: 100%;
+      min-height: 390px;
+      max-height: 580px;
+      background: radial-gradient(ellipse at center, var(--felt-center) 0%, var(--felt-edge) 100%);
+      border-radius: 180px;
+      border: 10px solid #291d12;
+      box-shadow:
+        inset 0 0 60px rgba(0,0,0,0.65),
+        0 0 0 3px var(--gold-dark),
+        0 20px 50px rgba(0,0,0,0.8);
+      display: grid;
+      grid-template-areas:
+        "topLeft    topCenter    topRight"
+        "midLeft    centerPot    midRight"
+        "botLeft    heroSeat     botRight";
+      grid-template-columns: 1fr 1.25fr 1fr;
+      grid-template-rows: 1fr auto 1.15fr;
+      padding: clamp(10px, 2vw, 24px);
+      gap: 6px;
+    }
+
+    /* Center Pot & Table Info */
+    .center-pot {
+      grid-area: centerPot;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      z-index: 5;
+      gap: 6px;
+    }
+
+    .pot-badge {
+      background: rgba(0, 0, 0, 0.55);
+      border: 1.5px solid var(--gold);
+      padding: 8px 18px;
+      border-radius: 999px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+
+    .pot-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #fde047;
+      font-weight: 700;
+    }
+
+    .pot-amount {
+      font-size: clamp(1.15rem, 2.8vw, 1.65rem);
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .table-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      font-size: 0.72rem;
+      color: #d1fae5;
+      background: rgba(0,0,0,0.35);
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+
+    .status-banner {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #f8fafc;
+      max-width: 260px;
+    }
+
+    /* Player Seats */
+    .seat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 10;
+      transition: opacity 0.25s;
+    }
+
+    .seat-0 { grid-area: heroSeat; }
+    .seat-1 { grid-area: midLeft; }
+    .seat-2 { grid-area: topLeft; }
+    .seat-3 { grid-area: topCenter; }
+    .seat-4 { grid-area: topRight; }
+    .seat-5 { grid-area: midRight; }
+
+    .seat.folded { opacity: 0.48; }
+
+    .player-box {
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      border: 1.5px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 6px 10px;
+      min-width: clamp(92px, 14vw, 138px);
+      text-align: center;
+      position: relative;
+      transition: all 0.25s ease;
+    }
+
+    .seat.active-turn .player-box {
+      border-color: var(--gold);
+      box-shadow: 0 0 18px rgba(245, 197, 66, 0.75);
+      transform: translateY(-2px);
+    }
+
+    .seat.winner .player-box {
+      border-color: #34d399;
+      background: rgba(6, 78, 59, 0.9);
+      box-shadow: 0 0 24px rgba(52, 211, 153, 0.9);
+    }
+
+    .p-name {
+      font-size: clamp(0.74rem, 1.6vw, 0.88rem);
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 120px;
+      margin: 0 auto;
+    }
+
+    .p-chips {
+      font-size: clamp(0.72rem, 1.5vw, 0.82rem);
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .p-tags {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      margin-top: 3px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      font-size: 0.62rem;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+    .tag-blind { background: #3b82f6; color: #fff; }
+    .tag-seen { background: #f59e0b; color: #000; }
+    .tag-pack { background: #ef4444; color: #fff; }
+    .tag-dealer { background: #fff; color: #000; }
+
+    /* Cards Hand */
+    .cards-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 4px;
+      position: relative;
+      height: var(--card-h);
+    }
+
+    .playing-card {
+      width: var(--card-w);
+      height: var(--card-h);
+      border-radius: 7px;
+      background: var(--card-bg);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.45);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 4px 5px;
+      font-weight: 800;
+      position: relative;
+      transition: transform 0.25s ease;
+      border: 1px solid #cbd5e1;
+    }
+
+    .playing-card:not(:first-child) {
+      margin-left: calc(var(--card-w) * -0.32);
+    }
+
+    .seat-0 .playing-card:not(:first-child) {
+      margin-left: 6px;
+    }
+
+    .playing-card.red { color: var(--red-suit); }
+    .playing-card.black { color: var(--black-suit); }
+
+    .playing-card.back {
+      background: linear-gradient(135deg, #1e3a8a 25%, #1d4ed8 50%, #1e3a8a 75%);
+      border: 2px solid #f8fafc;
+      color: transparent;
+    }
+    .playing-card.back::after {
+      content: "♠♥";
+      color: rgba(255,255,255,0.22);
+      font-size: 0.85rem;
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-corner {
+      font-size: clamp(0.72rem, 1.6vw, 0.95rem);
+      line-height: 1;
+      text-align: left;
+    }
+    .card-center {
+      font-size: clamp(1.05rem, 2.5vw, 1.5rem);
+      text-align: center;
+      line-height: 1;
+    }
+
+    .see-btn-overlay {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      height: 30px;
+      width: max-content;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1.5px solid var(--gold);
+      color: var(--gold);
+      font-size: 0.75rem;
+      font-weight: 800;
+      cursor: pointer;
+      z-index: 15;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+    }
+
+    .hand-rank-pill {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #6ee7b7;
+      background: rgba(6, 78, 59, 0.85);
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-bottom: 3px;
+    }
+
+    /* ---------- ACTION DOCK (BOTTOM CONTROLS) ---------- */
+    .action-dock {
+      background: var(--glass);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      padding: 10px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      z-index: 25;
+    }
+
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .act-btn {
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 800;
+      font-size: clamp(0.78rem, 1.8vw, 0.9rem);
+      cursor: pointer;
+      color: #fff;
+      min-width: 92px;
+      transition: 0.15s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.2;
+    }
+    .act-btn small { font-size: 0.68rem; font-weight: 600; opacity: 0.9; }
+    .act-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .act-btn:not(:disabled):active { transform: scale(0.96); }
+
+    .btn-pack { background: #dc2626; }
+    .btn-chaal { background: #059669; }
+    .btn-raise { background: #d97706; }
+    .btn-side { background: #2563eb; }
+    .btn-show { background: linear-gradient(135deg, #f59e0b, #b45309); color: #fff; }
+
+    /* ---------- MODAL ---------- */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+
+    .modal-card {
+      background: #0f172a;
+      border: 1.5px solid var(--gold);
+      border-radius: 20px;
+      padding: 22px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* ---------- FOLDABLES, PORTRAIT MOBILE & DUAL-PANE ADAPTATION ---------- */
+    /* Narrow Folded Cover Screens (e.g., Galaxy Z Fold cover ~280px - 360px) */
+    @media (max-width: 400px) {
+      .poker-table {
+        border-radius: 42px;
+        border-width: 6px;
+        padding: 8px 4px;
+        grid-template-columns: 1fr 1.1fr 1fr;
+      }
+      .player-box {
+        min-width: 74px;
+        padding: 4px 6px;
+      }
+      .p-name { max-width: 68px; }
+      .act-btn {
+        min-width: 72px;
+        padding: 8px 10px;
+      }
+    }
+
+    /* Portrait Tablets & Standard Phones */
+    @media (max-width: 768px) and (orientation: portrait) {
+      .poker-table {
+        border-radius: 75px;
+        min-height: 460px;
+      }
+    }
+
+    /* Unfolded Foldables & Tablets in Landscape (Dual-Pane / Wide Viewport) */
+    @media (min-width: 900px) and (min-height: 600px) {
+      .poker-table {
+        border-radius: 240px;
+        min-height: 470px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP NAVIGATION -->
+  <header class="topbar">
+    <div class="brand">♠ TEEN PATTI ROYAL</div>
+    <div id="roomHud" style="display:none; align-items:center; gap:8px; flex-wrap:wrap;">
+      <div class="room-pill">
+        Room: <code id="hudRoomCode">----</code>
+        <button class="btn-icon" onclick="copyRoomLink()">Copy</button>
+      </div>
+      <button class="btn-icon" onclick="openRulesModal()">Rules</button>
+      <button class="btn-icon" style="border-color:#ef4444;color:#fca5a5;" onclick="leaveRoom()">Leave</button>
+    </div>
+  </header>
+
+  <!-- LOBBY SCREEN -->
+  <main id="lobbyScreen">
+    <div class="lobby-card">
+      <h1 class="lobby-title">3 PATTI CLUB</h1>
+      <p class="lobby-sub">Real-Time Multiplayer • Blind, Seen, Sideshow & Show</p>
+
+      <div class="form-group">
+        <label>Your Display Name</label>
+        <input id="playerNameInput" class="input-field" type="text" maxlength="16" placeholder="e.g. Atharva" />
+      </div>
+
+      <div class="grid-2" style="margin-bottom:14px;">
+        <div>
+          <label style="font-size:0.72rem;color:#cbd5e1;font-weight:700;display:block;margin-bottom:4px;">BOOT AMOUNT</label>
+          <select id="bootSelect" class="input-field">
+            <option value="10">₹10 Boot</option>
+            <option value="50" selected>₹50 Boot</option>
+            <option value="100">₹100 Boot</option>
+            <option value="500">₹500 Boot</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:0.72rem;color:#cbd5e1;font-weight:700;display:block;margin-bottom:4px;">STARTING CHIPS</label>
+          <select id="chipsSelect" class="input-field">
+            <option value="2000">₹2,000</option>
+            <option value="5000" selected>₹5,000</option>
+            <option value="10000">₹10,000</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn btn-gold" onclick="createMultiplayerRoom()">Create Multiplayer Table</button>
+
+      <div class="divider"><span>OR JOIN WITH CODE</span></div>
+
+      <div class="grid-2">
+        <input id="joinCodeInput" class="input-field" type="text" maxlength="6" placeholder="ROOM CODE" style="text-transform:uppercase;text-align:center;font-weight:800;letter-spacing:2px;" />
+        <button class="btn btn-emerald" onclick="joinMultiplayerRoom()">Join Room</button>
+      </div>
+
+      <div class="divider"><span>INSTANT SOLO PRACTICE</span></div>
+
+      <button class="btn btn-outline" onclick="startSoloBotGame()">Play vs AI Bots (Offline Mode)</button>
+
+      <div style="margin-top:16px;text-align:center;">
+        <button class="sb-toggle" onclick="toggleSupabaseConfig()">⚙ Configure Supabase Keys (Required for Online)</button>
+        <div id="sbConfigBox" style="display:none;text-align:left;margin-top:8px;background:rgba(0,0,0,0.35);padding:12px;border-radius:12px;">
+          <div class="form-group">
+            <label>Supabase Project URL</label>
+            <input id="sbUrlInput" class="input-field" type="text" placeholder="https://xyzcompany.supabase.co" />
+          </div>
+          <div class="form-group" style="margin-bottom:8px;">
+            <label>Supabase Anon Public Key</label>
+            <input id="sbKeyInput" class="input-field" type="password" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." />
+          </div>
+          <button class="btn btn-emerald" style="padding:8px;" onclick="saveSupabaseConfig()">Save Credentials</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- GAME ARENA -->
+  <section id="gameScreen">
+    <div class="table-wrapper">
+      <div class="poker-table" id="pokerTable">
+        <!-- Seats rendered dynamically into seat-0 .. seat-5 -->
+        <div class="seat seat-0" id="seat-0"></div>
+        <div class="seat seat-1" id="seat-1"></div>
+        <div class="seat seat-2" id="seat-2"></div>
+        <div class="seat seat-3" id="seat-3"></div>
+        <div class="seat seat-4" id="seat-4"></div>
+        <div class="seat seat-5" id="seat-5"></div>
+
+        <!-- Center Pot -->
+        <div class="center-pot">
+          <div class="pot-badge">
+            <div class="pot-label">TOTAL POT</div>
+            <div class="pot-amount" id="potAmount">₹0</div>
+          </div>
+          <div class="table-meta">
+            <span>Boot: <strong id="metaBoot">₹50</strong></span>
+            <span>•</span>
+            <span>Stake: <strong id="metaStake">₹50</strong></span>
+            <span>•</span>
+            <span>Max Pot: <strong id="metaPotLimit">₹5,000</strong></span>
+          </div>
+          <div class="status-banner" id="statusBanner">Waiting for players...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM ACTION DOCK -->
+    <div class="action-dock">
+      <div id="hostControls" style="display:none;gap:8px;width:100%;justify-content:center;">
+        <button class="btn btn-gold" style="max-width:260px;" id="startRoundBtn" onclick="hostStartNewRound()">Deal Cards / Start Round</button>
+      </div>
+
+      <div class="action-buttons" id="playerActionButtons" style="display:none;">
+        <button class="act-btn btn-pack" id="btnPack" onclick="playerAction('PACK')">
+          PACK
+          <small>Fold Hand</small>
+        </button>
+        <button class="act-btn btn-chaal" id="btnChaal" onclick="playerAction('CHAAL')">
+          <span id="chaalLabel">BLIND</span>
+          <small id="chaalAmt">₹50</small>
+        </button>
+        <button class="act-btn btn-raise" id="btnRaise" onclick="playerAction('RAISE')">
+          RAISE 2X
+          <small id="raiseAmt">₹100</small>
+        </button>
+        <button class="act-btn btn-side" id="btnSideshow" onclick="playerAction('SIDESHOW')">
+          SIDESHOW
+          <small id="sideAmt">Ask Prev</small>
+        </button>
+        <button class="act-btn btn-show" id="btnShow" onclick="playerAction('SHOW')">
+          SHOW
+          <small id="showAmt">Final 2</small>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SIDESHOW REQUEST / RULES MODAL -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal-card" id="modalContent"></div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       1. TEEN PATTI CARD & HAND EVALUATION ENGINE
+       ========================================================================== */
+    const SUITS = [
+      { symbol: '♠', name: 'spades', color: 'black' },
+      { symbol: '♥', name: 'hearts', color: 'red' },
+      { symbol: '♦', name: 'diamonds', color: 'red' },
+      { symbol: '♣', name: 'clubs', color: 'black' }
+    ];
+
+    const RANKS = [
+      { value: 2, label: '2' }, { value: 3, label: '3' }, { value: 4, label: '4' },
+      { value: 5, label: '5' }, { value: 6, label: '6' }, { value: 7, label: '7' },
+      { value: 8, label: '8' }, { value: 9, label: '9' }, { value: 10, label: '10' },
+      { value: 11, label: 'J' }, { value: 12, label: 'Q' }, { value: 13, label: 'K' },
+      { value: 14, label: 'A' }
+    ];
+
+    function createShuffledDeck() {
+      const deck = [];
+      for (const s of SUITS) {
+        for (const r of RANKS) {
+          deck.push({ suit: s.symbol, color: s.color, value: r.value, label: r.label });
+        }
+      }
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+      return deck;
+    }
+
+    /**
+     * Evaluates a 3-card Teen Patti hand.
+     * Categories:
+     * 6 = Trail / Trio (Three of a kind)
+     * 5 = Pure Sequence (Straight Flush)
+     * 4 = Sequence (Straight) - Note: A-2-3 is 2nd highest after A-K-Q
+     * 3 = Color (Flush)
+     * 2 = Pair
+     * 1 = High Card
+     */
+    function evaluateTeenPattiHand(cards) {
+      const sorted = [...cards].sort((a, b) => b.value - a.value);
+      const v = sorted.map(c => c.value);
+      const isFlush = sorted[0].suit === sorted[1].suit && sorted[1].suit === sorted[2].suit;
+
+      // Check Sequence (A-K-Q = 14,13,12; A-2-3 = 14,3,2)
+      let isStraight = false;
+      let straightRank = v[0];
+      if (v[0] - v[1] === 1 && v[1] - v[2] === 1) {
+        isStraight = true;
+        straightRank = v[0];
+      } else if (v[0] === 14 && v[1] === 3 && v[2] === 2) {
+        isStraight = true;
+        straightRank = 13.5; // Ranked right below A-K-Q (14) and above K-Q-J (13)
+      }
+
+      // 6. Trail (Three of a kind)
+      if (v[0] === v[1] && v[1] === v[2]) {
+        return { category: 6, name: `Trail of ${sorted[0].label}s`, score: 6e6 + v[0] * 1e4 };
+      }
+
+      // 5. Pure Sequence
+      if (isFlush && isStraight) {
+        return { category: 5, name: 'Pure Sequence', score: 5e6 + straightRank * 1e4 };
+      }
+
+      // 4. Sequence
+      if (isStraight) {
+        return { category: 4, name: 'Sequence', score: 4e6 + straightRank * 1e4 };
+      }
+
+      // 3. Color (Flush)
+      if (isFlush) {
+        return { category: 3, name: 'Color', score: 3e6 + v[0] * 1e4 + v[1] * 100 + v[2] };
+      }
+
+      // 2. Pair
+      if (v[0] === v[1] || v[1] === v[2]) {
+        const pairVal = v[1];
+        const kicker = v[0] === v[1] ? v[2] : v[0];
+        return { category: 2, name: `Pair of ${sorted[1].label}s`, score: 2e6 + pairVal * 1e4 + kicker * 100 };
+      }
+
+      // 1. High Card
+      return { category: 1, name: `High Card ${sorted[0].label}`, score: 1e6 + v[0] * 1e4 + v[1] * 100 + v[2] };
+    }
+
+    /* ==========================================================================
+       2. STATE MANAGEMENT & SUPABASE REALTIME SYNC
+       ========================================================================== */
+    let supabaseClient = null;
+    let realtimeChannel = null;
+    let isOfflineBotMode = false;
+    let botTimer = null;
+
+    const myId = 'usr_' + Math.random().toString(36).substring(2, 10);
+    let myName = localStorage.getItem('tp_name') || '';
+
+    // Authoritative Game State (Managed by Room Host and synced to all clients)
+    let gameState = {
+      roomCode: '',
+      hostId: '',
+      phase: 'WAITING', // WAITING | PLAYING | SHOWDOWN
+      bootAmount: 50,
+      startingChips: 5000,
+      pot: 0,
+      currentStake: 50, // Base blind stake
+      chaalLimit: 1600,
+      potLimit: 5000,
+      dealerIndex: 0,
+      turnIndex: 0,
+      statusText: 'Waiting for players to join...',
+      pendingSideshow: null, // { fromId, toId }
+      winnerIds: [],
+      players: [] // { id, name, chips, cards, isSeen, isFolded, isBot, blindCount }
+    };
+
+    // Init UI values
+    document.getElementById('playerNameInput').value = myName;
+    const savedUrl = localStorage.getItem('tp_sb_url') || '';
+    const savedKey = localStorage.getItem('tp_sb_key') || '';
+    document.getElementById('sbUrlInput').value = savedUrl;
+    document.getElementById('sbKeyInput').value = savedKey;
+
+    // Check URL param ?room=XXXX
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('room')) {
+      document.getElementById('joinCodeInput').value = urlParams.get('room').toUpperCase();
+    }
+
+    function toggleSupabaseConfig() {
+      const box = document.getElementById('sbConfigBox');
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function saveSupabaseConfig() {
+      const url = document.getElementById('sbUrlInput').value.trim();
+      const key = document.getElementById('sbKeyInput').value.trim();
+      if (!url || !key) return alert('Enter both Supabase URL and Anon Key.');
+      localStorage.setItem('tp_sb_url', url);
+      localStorage.setItem('tp_sb_key', key);
+      alert('Supabase credentials saved!');
+      toggleSupabaseConfig();
+    }
+
+    function initSupabase() {
+      const url = localStorage.getItem('tp_sb_url');
+      const key = localStorage.getItem('tp_sb_key');
+      if (!url || !key) {
+        toggleSupabaseConfig();
+        alert('Please enter your Supabase Project URL and Anon Key first, or click "Play vs AI Bots".');
+        return false;
+      }
+      supabaseClient = window.supabase.createClient(url, key);
+      return true;
+    }
+
+    function getPlayerName() {
+      const val = document.getElementById('playerNameInput').value.trim();
+      myName = val || 'Player_' + Math.floor(100 + Math.random() * 899);
+      localStorage.setItem('tp_name', myName);
+      return myName;
+    }
+
+    /* ==========================================================================
+       3. MULTIPLAYER ROOM & OFFLINE BOT ENTRY
+       ========================================================================== */
+    async function createMultiplayerRoom() {
+      if (!initSupabase()) return;
+      getPlayerName();
+      isOfflineBotMode = false;
+
+      const code = Math.random().toString(36).substring(2, 6).toUpperCase();
+      const boot = parseInt(document.getElementById('bootSelect').value, 10);
+      const chips = parseInt(document.getElementById('chipsSelect').value, 10);
+
+      gameState = {
+        roomCode: code,
+        hostId: myId,
+        phase: 'WAITING',
+        bootAmount: boot,
+        startingChips: chips,
+        pot: 0,
+        currentStake: boot,
+        chaalLimit: boot * 32,
+        potLimit: boot * 100,
+        dealerIndex: 0,
+        turnIndex: 0,
+        statusText: 'Share the room code! Host can deal anytime.',
+        pendingSideshow: null,
+        winnerIds: [],
+        players: [{
+          id: myId,
+          name: myName,
+          chips: chips,
+          cards: [],
+          isSeen: false,
+          isFolded: false,
+          isBot: false,
+          blindCount: 0
+        }]
+      };
+
+      await connectToRoomChannel(code, true);
+      enterGameUI();
+    }
+
+    async function joinMultiplayerRoom() {
+      if (!initSupabase()) return;
+      getPlayerName();
+      isOfflineBotMode = false;
+
+      const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
+      if (code.length < 4) return alert('Enter a valid 4-letter Room Code.');
+
+      gameState.roomCode = code;
+      await connectToRoomChannel(code, false);
+      enterGameUI();
+    }
+
+    async function connectToRoomChannel(code, isCreator) {
+      if (realtimeChannel) await supabaseClient.removeChannel(realtimeChannel);
+
+      realtimeChannel = supabaseClient.channel(`teenpatti_${code}`, {
+        config: { broadcast: { self: true } }
+      });
+
+      realtimeChannel
+        .on('broadcast', { event: 'STATE_SYNC' }, ({ payload }) => {
+          gameState = payload;
+          renderGame();
+        })
+        .on('broadcast', { event: 'PLAYER_JOIN' }, ({ payload }) => {
+          if (gameState.hostId === myId) {
+            const exists = gameState.players.find(p => p.id === payload.id);
+            if (!exists && gameState.players.length < 6) {
+              gameState.players.push({
+                id: payload.id,
+                name: payload.name,
+                chips: gameState.startingChips,
+                cards: [],
+                isSeen: false,
+                isFolded: gameState.phase === 'PLAYING',
+                isBot: false,
+                blindCount: 0
+              });
+              gameState.statusText = `${payload.name} joined the table!`;
+              broadcastState();
+            }
+          }
+        })
+        .on('broadcast', { event: 'CLIENT_ACTION' }, ({ payload }) => {
+          if (gameState.hostId === myId) {
+            processPlayerActionOnHost(payload.playerId, payload.action, payload.extra);
+          }
+        })
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            if (isCreator) {
+              broadcastState();
+            } else {
+              realtimeChannel.send({
+                type: 'broadcast',
+                event: 'PLAYER_JOIN',
+                payload: { id: myId, name: myName }
+              });
+            }
+          }
+        });
+    }
+
+    function broadcastState() {
+      if (isOfflineBotMode) {
+        renderGame();
+        scheduleBotTurnIfNeeded();
+        return;
+      }
+      if (realtimeChannel) {
+        realtimeChannel.send({
+          type: 'broadcast',
+          event: 'STATE_SYNC',
+          payload: gameState
+        });
+      }
+    }
+
+    function startSoloBotGame() {
+      getPlayerName();
+      isOfflineBotMode = true;
+      const boot = parseInt(document.getElementById('bootSelect').value, 10);
+      const chips = parseInt(document.getElementById('chipsSelect').value, 10);
+
+      gameState = {
+        roomCode: 'SOLO',
+        hostId: myId,
+        phase: 'WAITING',
+        bootAmount: boot,
+        startingChips: chips,
+        pot: 0,
+        currentStake: boot,
+        chaalLimit: boot * 32,
+        potLimit: boot * 100,
+        dealerIndex: 0,
+        turnIndex: 0,
+        statusText: 'Solo Table Ready! Click Deal Cards to begin.',
+        pendingSideshow: null,
+        winnerIds: [],
+        players: [
+          { id: myId, name: myName, chips, cards: [], isSeen: false, isFolded: false, isBot: false, blindCount: 0 },
+          { id: 'bot_1', name: 'Kabir (Bot)', chips, cards: [], isSeen: false, isFolded: false, isBot: true, blindCount: 0 },
+          { id: 'bot_2', name: 'Meera (Bot)', chips, cards: [], isSeen: false, isFolded: false, isBot: true, blindCount: 0 },
+          { id: 'bot_3', name: 'Rohan (Bot)', chips, cards: [], isSeen: false, isFolded: false, isBot: true, blindCount: 0 }
+        ]
+      };
+
+      enterGameUI();
+      hostStartNewRound();
+    }
+
+    function enterGameUI() {
+      document.getElementById('lobbyScreen').style.display = 'none';
+      document.getElementById('gameScreen').style.display = 'flex';
+      document.getElementById('roomHud').style.display = 'flex';
+      document.getElementById('hudRoomCode').textContent = gameState.roomCode;
+      renderGame();
+    }
+
+    function leaveRoom() {
+      clearTimeout(botTimer);
+      if (realtimeChannel && supabaseClient) {
+        supabaseClient.removeChannel(realtimeChannel);
+      }
+      document.getElementById('gameScreen').style.display = 'none';
+      document.getElementById('roomHud').style.display = 'none';
+      document.getElementById('lobbyScreen').style.display = 'flex';
+    }
+
+    function copyRoomLink() {
+      const shareUrl = `${window.location.origin}${window.location.pathname}?room=${gameState.roomCode}`;
+      navigator.clipboard.writeText(shareUrl);
+      alert(`Room Invite Link Copied!\nCode: ${gameState.roomCode}`);
+    }
+
+    /* ==========================================================================
+       4. TEEN PATTI GAMEPLAY & RULES ENGINE (HOST AUTHORITATIVE)
+       ========================================================================== */
+    function hostStartNewRound() {
+      if (gameState.hostId !== myId) return;
+
+      // Auto-refill broke players for continuous play
+      gameState.players.forEach(p => {
+        if (p.chips < gameState.bootAmount) {
+          p.chips = gameState.startingChips;
+        }
+      });
+
+      if (gameState.players.length < 2) {
+        alert('Need at least 2 players at the table to deal!');
+        return;
+      }
+
+      const deck = createShuffledDeck();
+      gameState.phase = 'PLAYING';
+      gameState.pot = 0;
+      gameState.currentStake = gameState.bootAmount;
+      gameState.pendingSideshow = null;
+      gameState.winnerIds = [];
+      gameState.dealerIndex = (gameState.dealerIndex + 1) % gameState.players.length;
+
+      gameState.players.forEach(p => {
+        p.cards = [deck.pop(), deck.pop(), deck.pop()];
+        p.isSeen = false;
+        p.isFolded = false;
+        p.blindCount = 0;
+        p.chips -= gameState.bootAmount;
+        gameState.pot += gameState.bootAmount;
+      });
+
+      gameState.turnIndex = (gameState.dealerIndex + 1) % gameState.players.length;
+      const firstPlayer = gameState.players[gameState.turnIndex];
+      gameState.statusText = `Boot ₹${gameState.bootAmount} collected. ${firstPlayer.name}'s turn.`;
+      broadcastState();
+    }
+
+    function getActivePlayers() {
+      return gameState.players.filter(p => !p.isFolded);
+    }
+
+    function getNextActivePlayerIndex(fromIdx) {
+      const total = gameState.players.length;
+      for (let i = 1; i <= total; i++) {
+        const idx = (fromIdx + i) % total;
+        if (!gameState.players[idx].isFolded) return idx;
+      }
+      return fromIdx;
+    }
+
+    function getPrevActivePlayer(fromIdx) {
+      const total = gameState.players.length;
+      for (let i = 1; i <= total; i++) {
+        const idx = (fromIdx - i + total) % total;
+        if (!gameState.players[idx].isFolded) return gameState.players[idx];
+      }
+      return null;
+    }
+
+    function playerAction(action, extra = {}) {
+      if (gameState.hostId === myId) {
+        processPlayerActionOnHost(myId, action, extra);
+      } else {
+        realtimeChannel.send({
+          type: 'broadcast',
+          event: 'CLIENT_ACTION',
+          payload: { playerId: myId, action, extra }
+        });
+      }
+    }
+
+    function processPlayerActionOnHost(playerId, action, extra = {}) {
+      if (gameState.phase !== 'PLAYING') return;
+
+      const pIndex = gameState.players.findIndex(p => p.id === playerId);
+      if (pIndex === -1) return;
+      const player = gameState.players[pIndex];
+
+      // 1. SEE CARDS (Can be done anytime before folding)
+      if (action === 'SEE') {
+        if (!player.isSeen && !player.isFolded) {
+          player.isSeen = true;
+          gameState.statusText = `${player.name} looked at their cards (Seen).`;
+          broadcastState();
+        }
+        return;
+      }
+
+      // 2. SIDESHOW RESPONSE (Accept / Decline)
+      if (action === 'SIDESHOW_RESPONSE' && gameState.pendingSideshow) {
+        const { fromId, toId } = gameState.pendingSideshow;
+        if (playerId !== toId) return;
+
+        const requester = gameState.players.find(p => p.id === fromId);
+        const target = gameState.players.find(p => p.id === toId);
+        gameState.pendingSideshow = null;
+
+        if (extra.accept) {
+          const reqEval = evaluateTeenPattiHand(requester.cards);
+          const tgtEval = evaluateTeenPattiHand(target.cards);
+          // In Teen Patti, on an exact tie in Sideshow, the player who requested the sideshow loses
+          if (reqEval.score > tgtEval.score) {
+            target.isFolded = true;
+            gameState.statusText = `Sideshow Accepted! ${requester.name} beat ${target.name}.`;
+          } else {
+            requester.isFolded = true;
+            gameState.statusText = `Sideshow Accepted! ${target.name} beat ${requester.name}.`;
+          }
+        } else {
+          gameState.statusText = `${target.name} declined ${requester.name}'s Sideshow.`;
+        }
+
+        if (checkSingleSurvivorWin()) return;
+        advanceTurn();
+        return;
+      }
+
+      // Enforce turn order for betting actions
+      if (pIndex !== gameState.turnIndex || gameState.pendingSideshow) return;
+
+      const betMultiplier = player.isSeen ? 2 : 1;
+      const callCost = gameState.currentStake * betMultiplier;
+
+      // 3. PACK (FOLD)
+      if (action === 'PACK') {
+        player.isFolded = true;
+        gameState.statusText = `${player.name} packed.`;
+        if (checkSingleSurvivorWin()) return;
+        advanceTurn();
+        return;
+      }
+
+      // 4. CHAAL / BLIND CALL
+      if (action === 'CHAAL') {
+        deductBet(player, callCost);
+        if (!player.isSeen) {
+          player.blindCount++;
+          // Traditional rule: max 4 blind turns allowed before auto-seen
+          if (player.blindCount >= 4) player.isSeen = true;
+        }
+        gameState.statusText = `${player.name} played ${player.isSeen ? 'Chaal' : 'Blind'} (₹${callCost}).`;
+        if (checkPotLimitReached()) return;
+        advanceTurn();
+        return;
+      }
+
+      // 5. RAISE (2X STAKE)
+      if (action === 'RAISE') {
+        const newStake = Math.min(gameState.currentStake * 2, gameState.chaalLimit);
+        const raiseCost = newStake * betMultiplier;
+        gameState.currentStake = newStake;
+        deductBet(player, raiseCost);
+        gameState.statusText = `${player.name} raised to ₹${raiseCost}!`;
+        if (checkPotLimitReached()) return;
+        advanceTurn();
+        return;
+      }
+
+      // 6. SIDESHOW REQUEST
+      if (action === 'SIDESHOW') {
+        const prevPlayer = getPrevActivePlayer(pIndex);
+        if (getActivePlayers().length > 2 && player.isSeen && prevPlayer && prevPlayer.isSeen) {
+          deductBet(player, callCost);
+          if (checkPotLimitReached()) return;
+
+          if (prevPlayer.isBot) {
+            // Bot automatically accepts sideshow
+            const reqEval = evaluateTeenPattiHand(player.cards);
+            const tgtEval = evaluateTeenPattiHand(prevPlayer.cards);
+            if (reqEval.score > tgtEval.score) {
+              prevPlayer.isFolded = true;
+              gameState.statusText = `Sideshow! ${player.name} defeated ${prevPlayer.name}.`;
+            } else {
+              player.isFolded = true;
+              gameState.statusText = `Sideshow! ${prevPlayer.name} defeated ${player.name}.`;
+            }
+            if (checkSingleSurvivorWin()) return;
+            advanceTurn();
+          } else {
+            gameState.pendingSideshow = { fromId: player.id, toId: prevPlayer.id };
+            gameState.statusText = `${player.name} asked ${prevPlayer.name} for a Sideshow...`;
+            broadcastState();
+          }
+        }
+        return;
+      }
+
+      // 7. SHOW (Final 2 Players)
+      if (action === 'SHOW') {
+        const active = getActivePlayers();
+        if (active.length === 2) {
+          deductBet(player, callCost);
+          resolveShowdown(active, `${player.name} called a Show!`);
+        }
+      }
+    }
+
+    function deductBet(player, amount) {
+      const actual = Math.min(player.chips, amount);
+      player.chips -= actual;
+      gameState.pot += actual;
+    }
+
+    function advanceTurn() {
+      gameState.turnIndex = getNextActivePlayerIndex(gameState.turnIndex);
+      const nextP = gameState.players[gameState.turnIndex];
+      gameState.statusText += ` → ${nextP.name}'s turn.`;
+      broadcastState();
+    }
+
+    function checkSingleSurvivorWin() {
+      const active = getActivePlayers();
+      if (active.length === 1) {
+        const winner = active[0];
+        winner.chips += gameState.pot;
+        gameState.phase = 'SHOWDOWN';
+        gameState.winnerIds = [winner.id];
+        gameState.statusText = `🏆 ${winner.name} wins ₹${gameState.pot} (All others packed)!`;
+        broadcastState();
+        return true;
+      }
+      return false;
+    }
+
+    function checkPotLimitReached() {
+      if (gameState.pot >= gameState.potLimit) {
+        resolveShowdown(getActivePlayers(), `Pot Limit (₹${gameState.potLimit}) reached! Auto Showdown!`);
+        return true;
+      }
+      return false;
+    }
+
+    function resolveShowdown(contenders, prefixText) {
+      let bestScore = -1;
+      let winners = [];
+      let bestHandName = '';
+
+      contenders.forEach(p => {
+        p.isSeen = true;
+        const res = evaluateTeenPattiHand(p.cards);
+        if (res.score > bestScore) {
+          bestScore = res.score;
+          winners = [p];
+          bestHandName = res.name;
+        } else if (res.score === bestScore) {
+          winners.push(p);
+        }
+      });
+
+      const share = Math.floor(gameState.pot / winners.length);
+      winners.forEach(w => { w.chips += share; });
+
+      gameState.phase = 'SHOWDOWN';
+      gameState.winnerIds = winners.map(w => w.id);
+      const winnerNames = winners.map(w => w.name).join(' & ');
+      gameState.statusText = `${prefixText} 🏆 ${winnerNames} wins ₹${gameState.pot} with ${bestHandName}!`;
+      broadcastState();
+    }
+
+    /* ==========================================================================
+       5. SMART AI BOT LOGIC (FOR OFFLINE DEMO MODE)
+       ========================================================================== */
+    function scheduleBotTurnIfNeeded() {
+      clearTimeout(botTimer);
+      if (!isOfflineBotMode || gameState.phase !== 'PLAYING') return;
+
+      const currentPlayer = gameState.players[gameState.turnIndex];
+      if (!currentPlayer || !currentPlayer.isBot || currentPlayer.isFolded) return;
+
+      botTimer = setTimeout(() => {
+        const hand = evaluateTeenPattiHand(currentPlayer.cards);
+        const activeCount = getActivePlayers().length;
+
+        // Bot decides whether to stay blind or look at cards
+        if (!currentPlayer.isSeen && Math.random() < 0.45) {
+          processPlayerActionOnHost(currentPlayer.id, 'SEE');
+        }
+
+        // If 2 players left and strong hand, call Show
+        if (activeCount === 2 && hand.category >= 2 && Math.random() < 0.55) {
+          processPlayerActionOnHost(currentPlayer.id, 'SHOW');
+          return;
+        }
+
+        // Fold weak seen hands occasionally
+        if (currentPlayer.isSeen && hand.category === 1 && hand.score < 1110000 && Math.random() < 0.55) {
+          processPlayerActionOnHost(currentPlayer.id, 'PACK');
+          return;
+        }
+
+        // Raise with strong hands (Pair+ or Sequence+)
+        if (hand.category >= 3 && gameState.currentStake < gameState.chaalLimit / 2 && Math.random() < 0.45) {
+          processPlayerActionOnHost(currentPlayer.id, 'RAISE');
+          return;
+        }
+
+        processPlayerActionOnHost(currentPlayer.id, 'CHAAL');
+      }, 1250);
+    }
+
+    /* ==========================================================================
+       6. RESPONSIVE UI RENDERER
+       ========================================================================== */
+    function renderGame() {
+      document.getElementById('potAmount').textContent = `₹${gameState.pot.toLocaleString()}`;
+      document.getElementById('metaBoot').textContent = `₹${gameState.bootAmount}`;
+      document.getElementById('metaStake').textContent = `₹${gameState.currentStake}`;
+      document.getElementById('metaPotLimit').textContent = `₹${gameState.potLimit.toLocaleString()}`;
+      document.getElementById('statusBanner').textContent = gameState.statusText;
+
+      // Rotate seats so current user ("Hero") is ALWAYS seated at bottom-center (seat-0)
+      const total = gameState.players.length;
+      const heroIdx = gameState.players.findIndex(p => p.id === myId);
+      const offset = heroIdx >= 0 ? heroIdx : 0;
+
+      for (let slot = 0; slot < 6; slot++) {
+        const seatEl = document.getElementById(`seat-${slot}`);
+        seatEl.innerHTML = '';
+        seatEl.className = `seat seat-${slot}`;
+
+        if (slot >= total) continue;
+
+        const actualIdx = (offset + slot) % total;
+        const player = gameState.players[actualIdx];
+        const isHero = player.id === myId;
+        const isTurn = gameState.phase === 'PLAYING' && gameState.turnIndex === actualIdx;
+        const isWinner = gameState.winnerIds.includes(player.id);
+        const isDealer = gameState.dealerIndex === actualIdx;
+
+        if (player.isFolded) seatEl.classList.add('folded');
+        if (isTurn) seatEl.classList.add('active-turn');
+        if (isWinner) seatEl.classList.add('winner');
+
+        // Cards HTML
+        let cardsHtml = '';
+        const showFaceUp =
+          (isHero && player.isSeen && player.cards.length === 3) ||
+          (gameState.phase === 'SHOWDOWN' && !player.isFolded && player.cards.length === 3);
+
+        if (player.cards.length === 3) {
+          cardsHtml = `<div class="cards-row">`;
+          player.cards.forEach(c => {
+            if (showFaceUp) {
+              cardsHtml += `
+                <div class="playing-card ${c.color}">
+                  <div class="card-corner">${c.label}<br>${c.suit}</div>
+                  <div class="card-center">${c.suit}</div>
+                </div>`;
+            } else {
+              cardsHtml += `<div class="playing-card back"></div>`;
+            }
+          });
+
+          // "SEE" Button overlay for Hero when Blind
+          if (isHero && !player.isSeen && !player.isFolded && gameState.phase === 'PLAYING') {
+            cardsHtml += `<button class="see-btn-overlay" onclick="playerAction('SEE')">👁 SEE</button>`;
+          }
+          cardsHtml += `</div>`;
+        }
+
+        // Hand rank pill if visible
+        let rankHtml = '';
+        if (showFaceUp) {
+          const evalRes = evaluateTeenPattiHand(player.cards);
+          rankHtml = `<div class="hand-rank-pill">${evalRes.name}</div>`;
+        }
+
+        // Status tags
+        let tagsHtml = '';
+        if (isDealer) tagsHtml += `<span class="tag tag-dealer">D</span>`;
+        if (gameState.phase !== 'WAITING') {
+          if (player.isFolded) tagsHtml += `<span class="tag tag-pack">PACKED</span>`;
+          else if (player.isSeen) tagsHtml += `<span class="tag tag-seen">SEEN</span>`;
+          else tagsHtml += `<span class="tag tag-blind">BLIND</span>`;
+        }
+
+        seatEl.innerHTML = `
+          ${rankHtml}
+          ${cardsHtml}
+          <div class="player-box">
+            <div class="p-name">${player.name} ${isHero ? '(You)' : ''}</div>
+            <div class="p-chips">₹${player.chips.toLocaleString()}</div>
+            <div class="p-tags">${tagsHtml}</div>
+          </div>
+        `;
+      }
+
+      // Host Start/Next Round Controls
+      const hostControls = document.getElementById('hostControls');
+      const actionButtons = document.getElementById('playerActionButtons');
+
+      if (gameState.phase === 'WAITING' || gameState.phase === 'SHOWDOWN') {
+        actionButtons.style.display = 'none';
+        if (gameState.hostId === myId) {
+          hostControls.style.display = 'flex';
+          document.getElementById('startRoundBtn').textContent =
+            gameState.phase === 'WAITING' ? 'Deal Cards / Start Game' : 'Deal Next Round';
+        } else {
+          hostControls.style.display = 'none';
+        }
+      } else {
+        hostControls.style.display = 'none';
+        actionButtons.style.display = 'flex';
+        updateHeroActionDock();
+      }
+
+      // Handle Incoming Sideshow Modal
+      renderSideshowModalIfNeeded();
+    }
+
+    function updateHeroActionDock() {
+      const hero = gameState.players.find(p => p.id === myId);
+      const isMyTurn =
+        hero &&
+        !hero.isFolded &&
+        gameState.phase === 'PLAYING' &&
+        !gameState.pendingSideshow &&
+        gameState.players[gameState.turnIndex]?.id === myId;
+
+      const btnPack = document.getElementById('btnPack');
+      const btnChaal = document.getElementById('btnChaal');
+      const btnRaise = document.getElementById('btnRaise');
+      const btnSideshow = document.getElementById('btnSideshow');
+      const btnShow = document.getElementById('btnShow');
+
+      if (!hero) return;
+
+      const mult = hero.isSeen ? 2 : 1;
+      const callAmt = gameState.currentStake * mult;
+      const nextStake = Math.min(gameState.currentStake * 2, gameState.chaalLimit);
+      const raiseAmt = nextStake * mult;
+
+      document.getElementById('chaalLabel').textContent = hero.isSeen ? 'CHAAL' : 'BLIND';
+      document.getElementById('chaalAmt').textContent = `₹${callAmt}`;
+      document.getElementById('raiseAmt').textContent = `₹${raiseAmt}`;
+
+      const activePlayers = getActivePlayers();
+      const myIdx = gameState.players.findIndex(p => p.id === myId);
+      const prevPlayer = getPrevActivePlayer(myIdx);
+
+      const canRaise = isMyTurn && gameState.currentStake < gameState.chaalLimit;
+      const canSideshow = isMyTurn && activePlayers.length > 2 && hero.isSeen && prevPlayer && prevPlayer.isSeen;
+      const canShow = isMyTurn && activePlayers.length === 2;
+
+      btnPack.disabled = !isMyTurn;
+      btnChaal.disabled = !isMyTurn;
+      btnRaise.disabled = !canRaise;
+      btnSideshow.disabled = !canSideshow;
+      btnShow.disabled = !canShow;
+    }
+
+    function renderSideshowModalIfNeeded() {
+      const backdrop = document.getElementById('modalBackdrop');
+      const content = document.getElementById('modalContent');
+
+      if (gameState.pendingSideshow && gameState.pendingSideshow.toId === myId) {
+        const requester = gameState.players.find(p => p.id === gameState.pendingSideshow.fromId);
+        backdrop.style.display = 'flex';
+        content.innerHTML = `
+          <h2 style="color:var(--gold);font-family:'Cinzel',serif;margin-bottom:8px;">SIDESHOW REQUEST</h2>
+          <p style="color:#cbd5e1;font-size:0.92rem;margin-bottom:18px;">
+            <strong>${requester ? requester.name : 'Opponent'}</strong> has requested a private card comparison (Sideshow). Whoever has the lower hand will pack.
+          </p>
+          <div class="grid-2">
+            <button class="btn btn-outline" onclick="respondSideshow(false)">Decline</button>
+            <button class="btn btn-gold" onclick="respondSideshow(true)">Accept Show</button>
+          </div>
+        `;
+      } else if (backdrop.dataset.mode !== 'rules') {
+        backdrop.style.display = 'none';
+      }
+    }
+
+    function respondSideshow(accept) {
+      document.getElementById('modalBackdrop').style.display = 'none';
+      playerAction('SIDESHOW_RESPONSE', { accept });
+    }
+
+    function openRulesModal() {
+      const backdrop = document.getElementById('modalBackdrop');
+      const content = document.getElementById('modalContent');
+      backdrop.dataset.mode = 'rules';
+      backdrop.style.display = 'flex';
+      content.innerHTML = `
+        <h2 style="color:var(--gold);font-family:'Cinzel',serif;margin-bottom:10px;">TEEN PATTI RULES</h2>
+        <div style="text-align:left;font-size:0.84rem;color:#e2e8f0;line-height:1.55;margin-bottom:16px;">
+          <p><strong>1. Hand Rankings (High to Low):</strong><br>
+          Trail (Three of a Kind) → Pure Sequence (Straight Flush) → Sequence (A-K-Q, A-2-3, K-Q-J...) → Color (Flush) → Pair → High Card.</p>
+          <p style="margin-top:8px;"><strong>2. Blind vs. Seen:</strong><br>
+          Blind players bet <strong>1x</strong> the current stake (up to 4 blind turns). Seen players bet <strong>2x</strong> the current stake.</p>
+          <p style="margin-top:8px;"><strong>3. Sideshow:</strong><br>
+          When 3+ players remain and both you and the previous active player are <strong>Seen</strong>, you can request a Sideshow. If accepted, the lower hand folds (tie loses to requester).</p>
+          <p style="margin-top:8px;"><strong>4. Show:</strong><br>
+          Can only be called when <strong>2 players</strong> remain active, or automatically when the Pot Limit is reached.</p>
+        </div>
+        <button class="btn btn-gold" onclick="closeRulesModal()">Got It</button>
+      `;
+    }
+
+    function closeRulesModal() {
+      const backdrop = document.getElementById('modalBackdrop');
+      backdrop.dataset.mode = '';
+      backdrop.style.display = 'none';
+    }
+  </script>
+</body>
+</html>
