@@ -19,9 +19,6 @@
       --black-suit: #111827;
       --glass: rgba(15, 23, 42, 0.78);
       --glass-border: rgba(255, 255, 255, 0.14);
-      --success: #10b981;
-      --danger: #ef4444;
-      --info: #3b82f6;
       --card-w: clamp(44px, 7.5vw, 72px);
       --card-h: calc(var(--card-w) * 1.42);
     }
@@ -134,9 +131,7 @@
       margin-bottom: 20px;
     }
 
-    .form-group {
-      margin-bottom: 14px;
-    }
+    .form-group { margin-bottom: 14px; }
 
     .form-group label {
       display: block;
@@ -240,14 +235,13 @@
       gap: 8px;
     }
 
-    /* Adaptive Table Container for Mobile, Fold, Tablet & Desktop */
     .table-wrapper {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
-      min-height: 410px;
+      min-height: 430px;
       padding: 8px;
     }
 
@@ -256,8 +250,8 @@
       width: 100%;
       max-width: 960px;
       height: 100%;
-      min-height: 390px;
-      max-height: 580px;
+      min-height: 410px;
+      max-height: 600px;
       background: radial-gradient(ellipse at center, var(--felt-center) 0%, var(--felt-edge) 100%);
       border-radius: 180px;
       border: 10px solid #291d12;
@@ -270,13 +264,14 @@
         "topLeft    topCenter    topRight"
         "midLeft    centerPot    midRight"
         "botLeft    heroSeat     botRight";
-      grid-template-columns: 1fr 1.25fr 1fr;
+      grid-template-columns: 1fr 1.3fr 1fr;
       grid-template-rows: 1fr auto 1.15fr;
       padding: clamp(10px, 2vw, 24px);
       gap: 6px;
+      overflow: visible;
     }
 
-    /* Center Pot & Table Info */
+    /* ---------- CENTER DECK SHOE & POT ---------- */
     .center-pot {
       grid-area: centerPot;
       display: flex;
@@ -288,16 +283,89 @@
       gap: 6px;
     }
 
+    .deck-zone {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 2px;
+    }
+
+    /* 3D Stacked Card Deck Case / Shoe */
+    .deck-shoe {
+      position: relative;
+      width: calc(var(--card-w) * 0.82);
+      height: calc(var(--card-h) * 0.82);
+      border-radius: 7px;
+      background: linear-gradient(135deg, #1e3a8a 25%, #1d4ed8 50%, #1e3a8a 75%);
+      border: 2px solid #f8fafc;
+      box-shadow:
+        0 2px 0 #cbd5e1,
+        0 4px 0 #1e293b,
+        0 6px 0 #cbd5e1,
+        0 8px 0 #1e293b,
+        0 10px 16px rgba(0, 0, 0, 0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: rotate(-6deg);
+      transition: transform 0.2s ease;
+    }
+
+    .deck-shoe::before {
+      content: "♠♥♦♣";
+      font-size: 0.65rem;
+      letter-spacing: 1px;
+      color: rgba(255, 255, 255, 0.35);
+    }
+
+    .deck-shoe.dealing {
+      transform: rotate(0deg) scale(1.06);
+      box-shadow:
+        0 2px 0 #cbd5e1,
+        0 4px 0 #1e293b,
+        0 6px 0 #cbd5e1,
+        0 8px 0 #1e293b,
+        0 0 22px rgba(245, 197, 66, 0.8);
+    }
+
+    .deck-count-tag {
+      position: absolute;
+      bottom: -8px;
+      right: -10px;
+      background: #0f172a;
+      color: var(--gold);
+      border: 1px solid var(--gold);
+      font-size: 0.62rem;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 999px;
+    }
+
+    /* Flying Card Animation Element */
+    .flying-card {
+      position: fixed;
+      width: calc(var(--card-w) * 0.82);
+      height: calc(var(--card-h) * 0.82);
+      border-radius: 6px;
+      background: linear-gradient(135deg, #1e3a8a 25%, #1d4ed8 50%, #1e3a8a 75%);
+      border: 2px solid #f8fafc;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.6);
+      pointer-events: none;
+      z-index: 999;
+      transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.36s ease;
+    }
+
     .pot-badge {
       background: rgba(0, 0, 0, 0.55);
       border: 1.5px solid var(--gold);
-      padding: 8px 18px;
+      padding: 6px 16px;
       border-radius: 999px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.4);
     }
 
     .pot-label {
-      font-size: 0.68rem;
+      font-size: 0.64rem;
       text-transform: uppercase;
       letter-spacing: 1.2px;
       color: #fde047;
@@ -305,17 +373,17 @@
     }
 
     .pot-amount {
-      font-size: clamp(1.15rem, 2.8vw, 1.65rem);
+      font-size: clamp(1.05rem, 2.5vw, 1.55rem);
       font-weight: 800;
       color: #fff;
     }
 
     .table-meta {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
       justify-content: center;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: #d1fae5;
       background: rgba(0,0,0,0.35);
       padding: 4px 10px;
@@ -323,11 +391,11 @@
     }
 
     .status-banner {
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(15, 23, 42, 0.88);
       border: 1px solid rgba(255,255,255,0.15);
       padding: 5px 12px;
       border-radius: 8px;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 600;
       color: #f8fafc;
       max-width: 260px;
@@ -421,6 +489,12 @@
       margin-bottom: 4px;
       position: relative;
       height: var(--card-h);
+      min-width: calc(var(--card-w) * 1.8);
+    }
+
+    @keyframes cardPopIn {
+      0% { opacity: 0; transform: scale(0.65) translateY(-10px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
     }
 
     .playing-card {
@@ -435,8 +509,8 @@
       padding: 4px 5px;
       font-weight: 800;
       position: relative;
-      transition: transform 0.25s ease;
       border: 1px solid #cbd5e1;
+      animation: cardPopIn 0.25s ease-out;
     }
 
     .playing-card:not(:first-child) {
@@ -505,7 +579,7 @@
       margin-bottom: 3px;
     }
 
-    /* ---------- ACTION DOCK (BOTTOM CONTROLS) ---------- */
+    /* ---------- ACTION DOCK ---------- */
     .action-dock {
       background: var(--glass);
       backdrop-filter: blur(16px);
@@ -576,7 +650,6 @@
     }
 
     /* ---------- FOLDABLES, PORTRAIT MOBILE & DUAL-PANE ADAPTATION ---------- */
-    /* Narrow Folded Cover Screens (e.g., Galaxy Z Fold cover ~280px - 360px) */
     @media (max-width: 400px) {
       .poker-table {
         border-radius: 42px;
@@ -595,19 +668,17 @@
       }
     }
 
-    /* Portrait Tablets & Standard Phones */
     @media (max-width: 768px) and (orientation: portrait) {
       .poker-table {
         border-radius: 75px;
-        min-height: 460px;
+        min-height: 470px;
       }
     }
 
-    /* Unfolded Foldables & Tablets in Landscape (Dual-Pane / Wide Viewport) */
     @media (min-width: 900px) and (min-height: 600px) {
       .poker-table {
         border-radius: 240px;
-        min-height: 470px;
+        min-height: 480px;
       }
     }
   </style>
@@ -700,11 +771,16 @@
         <div class="seat seat-4" id="seat-4"></div>
         <div class="seat seat-5" id="seat-5"></div>
 
-        <!-- Center Pot -->
+        <!-- Center Deck Shoe & Pot -->
         <div class="center-pot">
-          <div class="pot-badge">
-            <div class="pot-label">TOTAL POT</div>
-            <div class="pot-amount" id="potAmount">₹0</div>
+          <div class="deck-zone">
+            <div class="deck-shoe" id="deckShoe" title="52-Card Deck">
+              <span class="deck-count-tag" id="deckCount">52</span>
+            </div>
+            <div class="pot-badge">
+              <div class="pot-label">TOTAL POT</div>
+              <div class="pot-amount" id="potAmount">₹0</div>
+            </div>
           </div>
           <div class="table-meta">
             <span>Boot: <strong id="metaBoot">₹50</strong></span>
@@ -787,22 +863,11 @@
       return deck;
     }
 
-    /**
-     * Evaluates a 3-card Teen Patti hand.
-     * Categories:
-     * 6 = Trail / Trio (Three of a kind)
-     * 5 = Pure Sequence (Straight Flush)
-     * 4 = Sequence (Straight) - Note: A-2-3 is 2nd highest after A-K-Q
-     * 3 = Color (Flush)
-     * 2 = Pair
-     * 1 = High Card
-     */
     function evaluateTeenPattiHand(cards) {
       const sorted = [...cards].sort((a, b) => b.value - a.value);
       const v = sorted.map(c => c.value);
       const isFlush = sorted[0].suit === sorted[1].suit && sorted[1].suit === sorted[2].suit;
 
-      // Check Sequence (A-K-Q = 14,13,12; A-2-3 = 14,3,2)
       let isStraight = false;
       let straightRank = v[0];
       if (v[0] - v[1] === 1 && v[1] - v[2] === 1) {
@@ -810,37 +875,26 @@
         straightRank = v[0];
       } else if (v[0] === 14 && v[1] === 3 && v[2] === 2) {
         isStraight = true;
-        straightRank = 13.5; // Ranked right below A-K-Q (14) and above K-Q-J (13)
+        straightRank = 13.5; // A-2-3 is 2nd highest after A-K-Q
       }
 
-      // 6. Trail (Three of a kind)
       if (v[0] === v[1] && v[1] === v[2]) {
         return { category: 6, name: `Trail of ${sorted[0].label}s`, score: 6e6 + v[0] * 1e4 };
       }
-
-      // 5. Pure Sequence
       if (isFlush && isStraight) {
         return { category: 5, name: 'Pure Sequence', score: 5e6 + straightRank * 1e4 };
       }
-
-      // 4. Sequence
       if (isStraight) {
         return { category: 4, name: 'Sequence', score: 4e6 + straightRank * 1e4 };
       }
-
-      // 3. Color (Flush)
       if (isFlush) {
         return { category: 3, name: 'Color', score: 3e6 + v[0] * 1e4 + v[1] * 100 + v[2] };
       }
-
-      // 2. Pair
       if (v[0] === v[1] || v[1] === v[2]) {
         const pairVal = v[1];
         const kicker = v[0] === v[1] ? v[2] : v[0];
         return { category: 2, name: `Pair of ${sorted[1].label}s`, score: 2e6 + pairVal * 1e4 + kicker * 100 };
       }
-
-      // 1. High Card
       return { category: 1, name: `High Card ${sorted[0].label}`, score: 1e6 + v[0] * 1e4 + v[1] * 100 + v[2] };
     }
 
@@ -851,37 +905,37 @@
     let realtimeChannel = null;
     let isOfflineBotMode = false;
     let botTimer = null;
+    let isDealingAnimation = false;
+    let dealtVisibleCounts = {}; // Tracks how many cards have landed per player during deal animation
+    let lastRoundId = 0;
 
     const myId = 'usr_' + Math.random().toString(36).substring(2, 10);
     let myName = localStorage.getItem('tp_name') || '';
 
-    // Authoritative Game State (Managed by Room Host and synced to all clients)
     let gameState = {
       roomCode: '',
       hostId: '',
+      roundId: 0,
       phase: 'WAITING', // WAITING | PLAYING | SHOWDOWN
       bootAmount: 50,
       startingChips: 5000,
       pot: 0,
-      currentStake: 50, // Base blind stake
+      deckRemaining: 52,
+      currentStake: 50,
       chaalLimit: 1600,
       potLimit: 5000,
       dealerIndex: 0,
       turnIndex: 0,
       statusText: 'Waiting for players to join...',
-      pendingSideshow: null, // { fromId, toId }
+      pendingSideshow: null,
       winnerIds: [],
-      players: [] // { id, name, chips, cards, isSeen, isFolded, isBot, blindCount }
+      players: []
     };
 
-    // Init UI values
     document.getElementById('playerNameInput').value = myName;
-    const savedUrl = localStorage.getItem('tp_sb_url') || '';
-    const savedKey = localStorage.getItem('tp_sb_key') || '';
-    document.getElementById('sbUrlInput').value = savedUrl;
-    document.getElementById('sbKeyInput').value = savedKey;
+    document.getElementById('sbUrlInput').value = localStorage.getItem('tp_sb_url') || '';
+    document.getElementById('sbKeyInput').value = localStorage.getItem('tp_sb_key') || '';
 
-    // Check URL param ?room=XXXX
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('room')) {
       document.getElementById('joinCodeInput').value = urlParams.get('room').toUpperCase();
@@ -936,10 +990,12 @@
       gameState = {
         roomCode: code,
         hostId: myId,
+        roundId: 0,
         phase: 'WAITING',
         bootAmount: boot,
         startingChips: chips,
         pot: 0,
+        deckRemaining: 52,
         currentStake: boot,
         chaalLimit: boot * 32,
         potLimit: boot * 100,
@@ -986,8 +1042,17 @@
 
       realtimeChannel
         .on('broadcast', { event: 'STATE_SYNC' }, ({ payload }) => {
+          const isNewRound = payload.roundId > lastRoundId && payload.phase === 'PLAYING';
+          lastRoundId = payload.roundId;
           gameState = payload;
-          renderGame();
+
+          if (isNewRound) {
+            runDealAnimationFromDeck(() => {
+              renderGame();
+            });
+          } else {
+            renderGame();
+          }
         })
         .on('broadcast', { event: 'PLAYER_JOIN' }, ({ payload }) => {
           if (gameState.hostId === myId) {
@@ -1030,8 +1095,17 @@
 
     function broadcastState() {
       if (isOfflineBotMode) {
-        renderGame();
-        scheduleBotTurnIfNeeded();
+        const isNewRound = gameState.roundId > lastRoundId && gameState.phase === 'PLAYING';
+        lastRoundId = gameState.roundId;
+        if (isNewRound) {
+          runDealAnimationFromDeck(() => {
+            renderGame();
+            scheduleBotTurnIfNeeded();
+          });
+        } else {
+          renderGame();
+          scheduleBotTurnIfNeeded();
+        }
         return;
       }
       if (realtimeChannel) {
@@ -1046,16 +1120,19 @@
     function startSoloBotGame() {
       getPlayerName();
       isOfflineBotMode = true;
+      lastRoundId = 0;
       const boot = parseInt(document.getElementById('bootSelect').value, 10);
       const chips = parseInt(document.getElementById('chipsSelect').value, 10);
 
       gameState = {
         roomCode: 'SOLO',
         hostId: myId,
+        roundId: 0,
         phase: 'WAITING',
         bootAmount: boot,
         startingChips: chips,
         pot: 0,
+        deckRemaining: 52,
         currentStake: boot,
         chaalLimit: boot * 32,
         potLimit: boot * 100,
@@ -1101,12 +1178,83 @@
     }
 
     /* ==========================================================================
-       4. TEEN PATTI GAMEPLAY & RULES ENGINE (HOST AUTHORITATIVE)
+       4. FLYING CARD DEALING ANIMATION FROM CENTER DECK SHOE
+       ========================================================================== */
+    function runDealAnimationFromDeck(onComplete) {
+      isDealingAnimation = true;
+      dealtVisibleCounts = {};
+      gameState.players.forEach(p => { dealtVisibleCounts[p.id] = 0; });
+      renderGame();
+
+      const deckEl = document.getElementById('deckShoe');
+      deckEl.classList.add('dealing');
+      const deckRect = deckEl.getBoundingClientRect();
+      const startX = deckRect.left + deckRect.width / 2;
+      const startY = deckRect.top + deckRect.height / 2;
+
+      const totalPlayers = gameState.players.length;
+      const heroIdx = Math.max(0, gameState.players.findIndex(p => p.id === myId));
+
+      // Build sequence: 3 passes clockwise starting after dealer
+      const dealQueue = [];
+      for (let cardNum = 1; cardNum <= 3; cardNum++) {
+        for (let step = 1; step <= totalPlayers; step++) {
+          const actualIdx = (gameState.dealerIndex + step) % totalPlayers;
+          const player = gameState.players[actualIdx];
+          if (!player.isFolded) {
+            const visualSlot = (actualIdx - heroIdx + totalPlayers) % totalPlayers;
+            dealQueue.push({ playerId: player.id, visualSlot, cardNum });
+          }
+        }
+      }
+
+      let currentDeckCount = 52;
+      const deckCountEl = document.getElementById('deckCount');
+
+      dealQueue.forEach((item, index) => {
+        setTimeout(() => {
+          currentDeckCount--;
+          deckCountEl.textContent = currentDeckCount;
+
+          const targetSeat = document.getElementById(`seat-${item.visualSlot}`);
+          const targetRect = targetSeat ? targetSeat.getBoundingClientRect() : deckRect;
+          const endX = targetRect.left + targetRect.width / 2;
+          const endY = targetRect.top + targetRect.height / 2;
+
+          const flyer = document.createElement('div');
+          flyer.className = 'flying-card';
+          flyer.style.left = `${startX - 24}px`;
+          flyer.style.top = `${startY - 34}px`;
+          document.body.appendChild(flyer);
+
+          requestAnimationFrame(() => {
+            const dx = endX - startX;
+            const dy = endY - startY;
+            flyer.style.transform = `translate(${dx}px, ${dy}px) rotate(${(item.cardNum - 2) * 10}deg)`;
+          });
+
+          setTimeout(() => {
+            flyer.remove();
+            dealtVisibleCounts[item.playerId] = item.cardNum;
+            renderGame();
+
+            if (index === dealQueue.length - 1) {
+              deckEl.classList.remove('dealing');
+              isDealingAnimation = false;
+              renderGame();
+              if (onComplete) onComplete();
+            }
+          }, 340);
+        }, index * 115);
+      });
+    }
+
+    /* ==========================================================================
+       5. TEEN PATTI GAMEPLAY & RULES ENGINE (HOST AUTHORITATIVE)
        ========================================================================== */
     function hostStartNewRound() {
-      if (gameState.hostId !== myId) return;
+      if (gameState.hostId !== myId || isDealingAnimation) return;
 
-      // Auto-refill broke players for continuous play
       gameState.players.forEach(p => {
         if (p.chips < gameState.bootAmount) {
           p.chips = gameState.startingChips;
@@ -1119,6 +1267,7 @@
       }
 
       const deck = createShuffledDeck();
+      gameState.roundId += 1;
       gameState.phase = 'PLAYING';
       gameState.pot = 0;
       gameState.currentStake = gameState.bootAmount;
@@ -1135,6 +1284,7 @@
         gameState.pot += gameState.bootAmount;
       });
 
+      gameState.deckRemaining = deck.length;
       gameState.turnIndex = (gameState.dealerIndex + 1) % gameState.players.length;
       const firstPlayer = gameState.players[gameState.turnIndex];
       gameState.statusText = `Boot ₹${gameState.bootAmount} collected. ${firstPlayer.name}'s turn.`;
@@ -1164,6 +1314,7 @@
     }
 
     function playerAction(action, extra = {}) {
+      if (isDealingAnimation) return;
       if (gameState.hostId === myId) {
         processPlayerActionOnHost(myId, action, extra);
       } else {
@@ -1182,7 +1333,6 @@
       if (pIndex === -1) return;
       const player = gameState.players[pIndex];
 
-      // 1. SEE CARDS (Can be done anytime before folding)
       if (action === 'SEE') {
         if (!player.isSeen && !player.isFolded) {
           player.isSeen = true;
@@ -1192,7 +1342,6 @@
         return;
       }
 
-      // 2. SIDESHOW RESPONSE (Accept / Decline)
       if (action === 'SIDESHOW_RESPONSE' && gameState.pendingSideshow) {
         const { fromId, toId } = gameState.pendingSideshow;
         if (playerId !== toId) return;
@@ -1204,7 +1353,6 @@
         if (extra.accept) {
           const reqEval = evaluateTeenPattiHand(requester.cards);
           const tgtEval = evaluateTeenPattiHand(target.cards);
-          // In Teen Patti, on an exact tie in Sideshow, the player who requested the sideshow loses
           if (reqEval.score > tgtEval.score) {
             target.isFolded = true;
             gameState.statusText = `Sideshow Accepted! ${requester.name} beat ${target.name}.`;
@@ -1221,13 +1369,11 @@
         return;
       }
 
-      // Enforce turn order for betting actions
       if (pIndex !== gameState.turnIndex || gameState.pendingSideshow) return;
 
       const betMultiplier = player.isSeen ? 2 : 1;
       const callCost = gameState.currentStake * betMultiplier;
 
-      // 3. PACK (FOLD)
       if (action === 'PACK') {
         player.isFolded = true;
         gameState.statusText = `${player.name} packed.`;
@@ -1236,12 +1382,10 @@
         return;
       }
 
-      // 4. CHAAL / BLIND CALL
       if (action === 'CHAAL') {
         deductBet(player, callCost);
         if (!player.isSeen) {
           player.blindCount++;
-          // Traditional rule: max 4 blind turns allowed before auto-seen
           if (player.blindCount >= 4) player.isSeen = true;
         }
         gameState.statusText = `${player.name} played ${player.isSeen ? 'Chaal' : 'Blind'} (₹${callCost}).`;
@@ -1250,7 +1394,6 @@
         return;
       }
 
-      // 5. RAISE (2X STAKE)
       if (action === 'RAISE') {
         const newStake = Math.min(gameState.currentStake * 2, gameState.chaalLimit);
         const raiseCost = newStake * betMultiplier;
@@ -1262,7 +1405,6 @@
         return;
       }
 
-      // 6. SIDESHOW REQUEST
       if (action === 'SIDESHOW') {
         const prevPlayer = getPrevActivePlayer(pIndex);
         if (getActivePlayers().length > 2 && player.isSeen && prevPlayer && prevPlayer.isSeen) {
@@ -1270,7 +1412,6 @@
           if (checkPotLimitReached()) return;
 
           if (prevPlayer.isBot) {
-            // Bot automatically accepts sideshow
             const reqEval = evaluateTeenPattiHand(player.cards);
             const tgtEval = evaluateTeenPattiHand(prevPlayer.cards);
             if (reqEval.score > tgtEval.score) {
@@ -1291,7 +1432,6 @@
         return;
       }
 
-      // 7. SHOW (Final 2 Players)
       if (action === 'SHOW') {
         const active = getActivePlayers();
         if (active.length === 2) {
@@ -1320,6 +1460,7 @@
         const winner = active[0];
         winner.chips += gameState.pot;
         gameState.phase = 'SHOWDOWN';
+        gameState.deckRemaining = 52;
         gameState.winnerIds = [winner.id];
         gameState.statusText = `🏆 ${winner.name} wins ₹${gameState.pot} (All others packed)!`;
         broadcastState();
@@ -1357,6 +1498,7 @@
       winners.forEach(w => { w.chips += share; });
 
       gameState.phase = 'SHOWDOWN';
+      gameState.deckRemaining = 52;
       gameState.winnerIds = winners.map(w => w.id);
       const winnerNames = winners.map(w => w.name).join(' & ');
       gameState.statusText = `${prefixText} 🏆 ${winnerNames} wins ₹${gameState.pot} with ${bestHandName}!`;
@@ -1364,11 +1506,11 @@
     }
 
     /* ==========================================================================
-       5. SMART AI BOT LOGIC (FOR OFFLINE DEMO MODE)
+       6. SMART AI BOT LOGIC (FOR OFFLINE DEMO MODE)
        ========================================================================== */
     function scheduleBotTurnIfNeeded() {
       clearTimeout(botTimer);
-      if (!isOfflineBotMode || gameState.phase !== 'PLAYING') return;
+      if (!isOfflineBotMode || gameState.phase !== 'PLAYING' || isDealingAnimation) return;
 
       const currentPlayer = gameState.players[gameState.turnIndex];
       if (!currentPlayer || !currentPlayer.isBot || currentPlayer.isFolded) return;
@@ -1377,24 +1519,20 @@
         const hand = evaluateTeenPattiHand(currentPlayer.cards);
         const activeCount = getActivePlayers().length;
 
-        // Bot decides whether to stay blind or look at cards
         if (!currentPlayer.isSeen && Math.random() < 0.45) {
           processPlayerActionOnHost(currentPlayer.id, 'SEE');
         }
 
-        // If 2 players left and strong hand, call Show
         if (activeCount === 2 && hand.category >= 2 && Math.random() < 0.55) {
           processPlayerActionOnHost(currentPlayer.id, 'SHOW');
           return;
         }
 
-        // Fold weak seen hands occasionally
         if (currentPlayer.isSeen && hand.category === 1 && hand.score < 1110000 && Math.random() < 0.55) {
           processPlayerActionOnHost(currentPlayer.id, 'PACK');
           return;
         }
 
-        // Raise with strong hands (Pair+ or Sequence+)
         if (hand.category >= 3 && gameState.currentStake < gameState.chaalLimit / 2 && Math.random() < 0.45) {
           processPlayerActionOnHost(currentPlayer.id, 'RAISE');
           return;
@@ -1405,16 +1543,18 @@
     }
 
     /* ==========================================================================
-       6. RESPONSIVE UI RENDERER
+       7. RESPONSIVE UI RENDERER
        ========================================================================== */
     function renderGame() {
       document.getElementById('potAmount').textContent = `₹${gameState.pot.toLocaleString()}`;
+      if (!isDealingAnimation) {
+        document.getElementById('deckCount').textContent = gameState.deckRemaining ?? 52;
+      }
       document.getElementById('metaBoot').textContent = `₹${gameState.bootAmount}`;
       document.getElementById('metaStake').textContent = `₹${gameState.currentStake}`;
       document.getElementById('metaPotLimit').textContent = `₹${gameState.potLimit.toLocaleString()}`;
       document.getElementById('statusBanner').textContent = gameState.statusText;
 
-      // Rotate seats so current user ("Hero") is ALWAYS seated at bottom-center (seat-0)
       const total = gameState.players.length;
       const heroIdx = gameState.players.findIndex(p => p.id === myId);
       const offset = heroIdx >= 0 ? heroIdx : 0;
@@ -1429,7 +1569,7 @@
         const actualIdx = (offset + slot) % total;
         const player = gameState.players[actualIdx];
         const isHero = player.id === myId;
-        const isTurn = gameState.phase === 'PLAYING' && gameState.turnIndex === actualIdx;
+        const isTurn = !isDealingAnimation && gameState.phase === 'PLAYING' && gameState.turnIndex === actualIdx;
         const isWinner = gameState.winnerIds.includes(player.id);
         const isDealer = gameState.dealerIndex === actualIdx;
 
@@ -1437,41 +1577,42 @@
         if (isTurn) seatEl.classList.add('active-turn');
         if (isWinner) seatEl.classList.add('winner');
 
-        // Cards HTML
-        let cardsHtml = '';
+        // Determine how many cards to render (all 3 normally, or progressive during deal animation)
+        const maxCardsToShow = isDealingAnimation
+          ? (dealtVisibleCounts[player.id] || 0)
+          : player.cards.length;
+
+        const visibleCards = player.cards.slice(0, maxCardsToShow);
+
+        let cardsHtml = `<div class="cards-row">`;
         const showFaceUp =
-          (isHero && player.isSeen && player.cards.length === 3) ||
-          (gameState.phase === 'SHOWDOWN' && !player.isFolded && player.cards.length === 3);
+          !isDealingAnimation &&
+          ((isHero && player.isSeen && player.cards.length === 3) ||
+          (gameState.phase === 'SHOWDOWN' && !player.isFolded && player.cards.length === 3));
 
-        if (player.cards.length === 3) {
-          cardsHtml = `<div class="cards-row">`;
-          player.cards.forEach(c => {
-            if (showFaceUp) {
-              cardsHtml += `
-                <div class="playing-card ${c.color}">
-                  <div class="card-corner">${c.label}<br>${c.suit}</div>
-                  <div class="card-center">${c.suit}</div>
-                </div>`;
-            } else {
-              cardsHtml += `<div class="playing-card back"></div>`;
-            }
-          });
-
-          // "SEE" Button overlay for Hero when Blind
-          if (isHero && !player.isSeen && !player.isFolded && gameState.phase === 'PLAYING') {
-            cardsHtml += `<button class="see-btn-overlay" onclick="playerAction('SEE')">👁 SEE</button>`;
+        visibleCards.forEach(c => {
+          if (showFaceUp) {
+            cardsHtml += `
+              <div class="playing-card ${c.color}">
+                <div class="card-corner">${c.label}<br>${c.suit}</div>
+                <div class="card-center">${c.suit}</div>
+              </div>`;
+          } else {
+            cardsHtml += `<div class="playing-card back"></div>`;
           }
-          cardsHtml += `</div>`;
-        }
+        });
 
-        // Hand rank pill if visible
+        if (!isDealingAnimation && isHero && !player.isSeen && !player.isFolded && gameState.phase === 'PLAYING' && player.cards.length === 3) {
+          cardsHtml += `<button class="see-btn-overlay" onclick="playerAction('SEE')">👁 SEE</button>`;
+        }
+        cardsHtml += `</div>`;
+
         let rankHtml = '';
         if (showFaceUp) {
           const evalRes = evaluateTeenPattiHand(player.cards);
           rankHtml = `<div class="hand-rank-pill">${evalRes.name}</div>`;
         }
 
-        // Status tags
         let tagsHtml = '';
         if (isDealer) tagsHtml += `<span class="tag tag-dealer">D</span>`;
         if (gameState.phase !== 'WAITING') {
@@ -1491,7 +1632,6 @@
         `;
       }
 
-      // Host Start/Next Round Controls
       const hostControls = document.getElementById('hostControls');
       const actionButtons = document.getElementById('playerActionButtons');
 
@@ -1510,13 +1650,13 @@
         updateHeroActionDock();
       }
 
-      // Handle Incoming Sideshow Modal
       renderSideshowModalIfNeeded();
     }
 
     function updateHeroActionDock() {
       const hero = gameState.players.find(p => p.id === myId);
       const isMyTurn =
+        !isDealingAnimation &&
         hero &&
         !hero.isFolded &&
         gameState.phase === 'PLAYING' &&
